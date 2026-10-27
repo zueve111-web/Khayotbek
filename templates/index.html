@@ -1,0 +1,54 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Khayotbek AI</title>
+<style>
+body{margin:0;background:#10131a;color:white;font-family:Arial,sans-serif;display:flex;justify-content:center;min-height:100vh}
+main{width:100%;max-width:650px;padding:20px;box-sizing:border-box}
+h1{text-align:center;color:#70e1c1}
+#chat{height:60vh;overflow:auto;background:#191e29;border-radius:14px;padding:14px}
+.msg{padding:12px;margin:10px 0;border-radius:10px;background:#282f40;overflow-wrap:anywhere}
+form{display:flex;gap:8px;margin-top:12px}
+input{flex:1;min-width:0;padding:14px;border-radius:10px;border:0;background:#252c3b;color:white}
+button{padding:12px;border:0;border-radius:10px;background:#70e1c1;color:#10131a;font-weight:bold}
+</style>
+</head>
+<body>
+<main>
+<h1>Khayotbek AI</h1>
+<p style="text-align:center">Твой личный ИИ-помощник</p>
+<div id="chat"><div class="msg">Привет! Я Khayotbek. Напиши мне сообщение.</div></div>
+<form id="form">
+<input id="message" placeholder="Напиши сообщение..." autocomplete="off" required>
+<button type="submit">Отправить</button>
+</form>
+</main>
+<script>
+const form=document.getElementById('form');
+const input=document.getElementById('message');
+const chat=document.getElementById('chat');
+form.addEventListener('submit',async(e)=>{
+e.preventDefault();
+const message=input.value.trim();
+if(!message)return;
+chat.insertAdjacentHTML('beforeend','<div class="msg"><b>Ты:</b> '+escapeHtml(message)+'</div>');
+input.value='';
+const wait=document.createElement('div');
+wait.className='msg';
+wait.textContent='Думаю...';
+chat.appendChild(wait);
+chat.scrollTop=chat.scrollHeight;
+try{
+const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message})});
+const data=await res.json();
+wait.textContent=data.reply||'Не удалось получить ответ.';
+}catch(err){wait.textContent='Ошибка соединения. Попробуй ещё раз.';}
+chat.scrollTop=chat.scrollHeight;
+});
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+</script>
+</body>
+</html>
